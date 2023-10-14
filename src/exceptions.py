@@ -1,2 +1,2 @@
 class NotFoundError(Exception):
-	pass
+    """ Raises if resource cant be finded on WB. """
