@@ -1,6 +1,5 @@
 import math
 
-import asyncio
 import aiohttp
 
 from .exceptions import NotFoundError
@@ -22,16 +21,6 @@ class Product:
         self.__part = self.__get_part()
         self.__vhost = self.__get_vhost()
         self.__create_urls()
-        self.__session = aiohttp.ClientSession()
-
-    def __del__(self) -> None:
-        """ Async delete created aiohttp session on object destroy. """
-        asyncio.run(self._close_session())
-
-    async def _close_session(self) -> None:
-        """ Close aiohttp session. """
-        if not self.__session.closed:
-            await self.__session.close()
 
     def __create_urls(self) -> None:
         """ Create map of needed urls. """
@@ -90,38 +79,44 @@ class Product:
 
     async def get_main(self) -> dict:
         """ Get main data of current product. """
-        async with self.__session.get(self.__URLS_MAP['main']) as resp:
-            if resp.status == 200:
-                return await resp.json()
-            raise NotFoundError(f'Cant find main data for product with id={self.__product_id}')
+        async with aiohttp.ClientSession() as session:
+            async with session.get(self.__URLS_MAP['main']) as resp:
+                if resp.status == 200:
+                    return await resp.json()
+                raise NotFoundError(f'Cant find main data for product with id={self.__product_id}')
 
     async def get_detail(self) -> dict:
         """ Get detail data of current product. """
-        async with self.__session.get(self.__URLS_MAP['detail']) as resp:
-            if resp.status == 200:
-                return await resp.json()
-            raise NotFoundError(f'Cant find detail data for product with id={self.__product_id}')
+        async with aiohttp.ClientSession() as session:
+            async with session.get(self.__URLS_MAP['detail']) as resp:
+                if resp.status == 200:
+                    print(self.__product_id)
+                    return await resp.json()
+                raise NotFoundError(f'Cant find detail data for product with id={self.__product_id}')
 
     async def get_price_history(self) -> dict:
         """ Get price history of current product. """
-        async with self.__session.get(self.__URLS_MAP['price_history']) as resp:
-            if resp.status==200:
-                return await resp.json()
-            return {}
+        async with aiohttp.ClientSession() as session:
+            async with session.get(self.__URLS_MAP['price_history']) as resp:
+                if resp.status==200:
+                    return await resp.json()
+                return {}
 
     async def get_sold_count(self) -> dict:
         """ Get detail sold count of current product. """
-        async with self.__session.get(self.__URLS_MAP['sold_count']) as resp:
-            if resp.status == 200:
-                return await resp.json()
-            raise NotFoundError(f'Cant find sold count data for product with id={self.__product_id}')
+        async with aiohttp.ClientSession() as session:
+            async with session.get(self.__URLS_MAP['sold_count']) as resp:
+                if resp.status == 200:
+                    return await resp.json()
+                raise NotFoundError(f'Cant find sold count data for product with id={self.__product_id}')
 
     async def get_seller(self) -> dict:
         """ Get seller of current product. """
-        async with self.__session.get(self.__URLS_MAP['seller']) as resp:
-            if resp.status == 200:
-                return await resp.json()
-            raise NotFoundError(f'Cant find seller for product with id={self.__product_id}')
+        async with aiohttp.ClientSession() as session:
+            async with session.get(self.__URLS_MAP['seller']) as resp:
+                if resp.status == 200:
+                    return await resp.json()
+                raise NotFoundError(f'Cant find seller for product with id={self.__product_id}')
 
     async def get_image_link(self) -> dict:
         """ Get big image of current product. """

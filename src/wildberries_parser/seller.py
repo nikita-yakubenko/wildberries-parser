@@ -18,16 +18,6 @@ class Seller:
         self.__seller_id = seller_id
         self.__ordering = ordering
         self.__create_urls()
-        self.__session = aiohttp.ClientSession()
-
-    def __del__(self) -> None:
-        """ Async delete created aiohttp session on object destroy. """
-        self._close_session()
-
-    async def _close_session(self) -> None:
-        """ Close aiohttp session. """
-        if not self.__session.closed:
-            await self.__session.close()
 
     def __create_urls(self) -> None:
         """ Create map of needed urls. """
@@ -40,15 +30,17 @@ class Seller:
 
     async def get_products(self, page: int) -> dict:
         """ Get all seller products from current page. """
-        async with self.__session.get(f'{self.__URLS_MAP["products"]}&page={page}') as resp:
-            if resp.status == 200:
-                return await resp.json()
-            raise NotFoundError('Продавец не найден. Проверьте введеный ID продавца!')
+        async with aiohttp.ClientSession() as session:
+            async with session.get(f'{self.__URLS_MAP["products"]}&page={page}') as resp:
+                if resp.status == 200:
+                    return await resp.json()
+                raise NotFoundError('Продавец не найден. Проверьте введеный ID продавца!')
 
     async def get_info(self) -> dict:
         """ Get info about seller. """
         headers = {'x-client-name': 'site'}
-        async with self.__session.get(self.__URLS_MAP['info'], headers=headers) as resp:
-            if resp.status == 200:
-                return await resp.json()
-            raise NotFoundError('Продавец не найден. Проверьте введеный ID продавца!')
+        async with aiohttp.ClientSession() as session:
+            async with session.get(self.__URLS_MAP['info'], headers=headers) as resp:
+                if resp.status == 200:
+                    return await resp.json()
+                raise NotFoundError('Продавец не найден. Проверьте введеный ID продавца!')

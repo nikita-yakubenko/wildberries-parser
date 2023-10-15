@@ -2,7 +2,6 @@ import asyncio
 
 from .seller import Seller
 from .product import Product
-from .exceptions import NotFoundError
 
 
 class WildberriesParser:
@@ -13,6 +12,12 @@ class WildberriesParser:
     seller_class = Seller
     product_class = Product
 
+    # WB bussines logic provide access max to 10000 seller items
+    SELLER_MAX_PRODUCTS = 9999
+
+    def __init__(self, concurents: int=200) -> None:
+        self.__semaphore = asyncio.Semaphore(concurents)
+
     def get_products_by_seller(self, seller_id: int, max_products: int, ordering: str) -> list:
         """
         Get list of product of seller.
@@ -20,6 +25,8 @@ class WildberriesParser:
         max_products - max count to parse;
         ordering - apply sorting;
         """
+        if max_products > self.SELLER_MAX_PRODUCTS:
+            raise ValueError(f'Value of parameter max_products must be lower than {self.SELLER_MAX_PRODUCTS+1}')
         max_pages = max_products // 100 + 1
         results = asyncio.run(
             self.get_products_by_seller_async(seller_id=seller_id, max_pages=max_pages, ordering=ordering))
@@ -67,15 +74,13 @@ class WildberriesParser:
         sold_count = asyncio.create_task(pr.get_sold_count())
         seller = asyncio.create_task(pr.get_seller())
         image = asyncio.create_task(pr.get_image_link())
-        try:
+        async with self.__semaphore:
             await main
             await detail
             await prices
             await sold_count
             await seller
             await image
-        except NotFoundError:
-            return {'not_found': True, 'product_id': product_id}
         product_data_dict = {
             'main':main.result(),
             'detail': detail.result(),
