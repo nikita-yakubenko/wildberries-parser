@@ -34,7 +34,7 @@ class Seller:
             async with session.get(f'{self.__URLS_MAP["products"]}&page={page}') as resp:
                 if resp.status == 200:
                     return await resp.json()
-                raise NotFoundError('Продавец не найден. Проверьте введеный ID продавца!')
+                raise NotFoundError(f'Cant find products for seller with id={self.__seller_id}')
 
     async def get_info(self) -> dict:
         """ Get info about seller. """
@@ -43,4 +43,4 @@ class Seller:
             async with session.get(self.__URLS_MAP['info'], headers=headers) as resp:
                 if resp.status == 200:
                     return await resp.json()
-                raise NotFoundError('Продавец не найден. Проверьте введеный ID продавца!')
+                raise NotFoundError(f'Cant find info for seller with id={self.__seller_id}')
