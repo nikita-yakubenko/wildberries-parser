@@ -1,7 +1,8 @@
 """
 In this example we just get products short data from seller.
 If you get products data by 'get_products_by_seller' - you receive short data for products.
-If you need full data for products - use 'get_products_data' method as explained in 'get_products_data_by_ids.py' example.
+If you need full data for products - use 'get_products_data' method as explained
+in 'get_products_data_by_ids.py' example.
 """
 
 
